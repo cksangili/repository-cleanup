@@ -1,0 +1,186 @@
+openapi: 3.1.0
+info:
+  title: Repository Cleanup API
+  version: 1.0.0
+  description: API for managing Git repositories and automatically removing stale branches.
+
+paths:
+  /repositories:
+    post:
+      summary: Add Repositories
+      description: Register a list of repositories for stale branches management.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repositories:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://gitlab.com/gcc-assessment/playground/playground-project", "https://gitlab.com/gcc-assessment/playground/experiment-hub"]
+      responses:
+        '200':
+          description: Repositories added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Repositories added successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid repositories
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Repositories not found
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Conflict - Repository already exists
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error
+
+    delete:
+      summary: Remove Repositories
+      description: Unregister a list of repositories from stale branches management.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repositories:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://gitlab.com/gcc-assessment/playground/playground-project", "https://gitlab.com/gcc-assessment/playground/experiment-hub"]
+      responses:
+        '200':
+          description: Repositories removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Repositories removed successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid repositories
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Repositories not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error
+
+    get:
+      summary: List Repositories
+      description: Display the repositories, their cleanup statuses, and the datetime (SGT) of the scheduled cleanup for stale branches.
+      responses:
+        '200':
+          description: A list of repositories with their cleanup statuses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          example: "https://gitlab.com/gcc-assessment/playground/playground-project"
+                        status:
+                          type: string
+                          example: "pending removal"
+                          enum: ["pending removal", "removed", "failed to remove"]
+                        next_cleanup_due:
+                          type: string
+                          format: date-time
+                          example: "2023-12-01T00:00:00Z"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error
+
+components:
+  schemas:
+    Repository:
+      type: object
+      properties:
+        url:
+          type: string
+          example: "https://gitlab.com/gcc-assessment/playground/playground-project"
+        status:
+          type: string
+          example: "pending removal"
+          enum: ["pending removal", "removed", "failed to remove"]
+        next_cleanup_due:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
